@@ -7,7 +7,7 @@ Trained (small) version available too.
 
 
 Features (may change as develoment proceeds)
-Adjustable server (add different tools for output generation)
+> Adjustable server (add different tools for output generation)
 PDf generator (included in server)
 RAG
-Simple Q/A answering.
+> Simple Q/A answering.
