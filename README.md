@@ -2,8 +2,8 @@
 KroxAI mini is an open source project. Currently work in progress. Expected November 2025.
 
 KroxAI mini
-Untrained simple AI transformer with RAG features (e.g for implementing live databases)
-Trained (small) version available too.
+> Untrained simple AI transformer with RAG features (e.g for implementing live databases)
+> Trained (small) version available too.
 
 
 Features (may change as develoment proceeds)
