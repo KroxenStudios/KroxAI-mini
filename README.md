@@ -1,5 +1,5 @@
 # KroxAI-mini
-**KroxAI mini** is an open source project. Currently work in progress. Expected November 2025.
+**KroxAI mini** is an open source AI project. Currently work in progress. Launch on 1st November 2025.
 
 **KroxAI mini**
 * Untrained simple EAM (Evidence‑Augmented Model) Chatbot with RAG features (e.g for implementing live databases)
