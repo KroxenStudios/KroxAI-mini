@@ -33,5 +33,4 @@ KroxAI mini is the first open-source prototype of this approach — a compact EA
 
 
 
-[Landing Page](https://kroxenstudios.github.io/KroxAI-Mini/)
 
