@@ -20,45 +20,20 @@ from collections import deque
 import sys
 from pathlib import Path
 
-# Ensure parent directory is on sys.path when running as a script
-_this_file = Path(__file__).resolve()
-_pkg_root = _this_file.parent
-_ws_root = _pkg_root.parent
-if str(_ws_root) not in sys.path:
-    sys.path.insert(0, str(_ws_root))
-
-# Robust imports: prefer relative (package mode), fallback to absolute or local (script mode)
-try:
-    from .torch_chat import KroxAI
-except Exception:
-    # If running as a script (python kroxai/server.py), ensure parent dir is on sys.path
-    this_dir = os.path.dirname(os.path.abspath(__file__))
-    parent = os.path.dirname(this_dir)
-    if parent not in sys.path:
-        sys.path.insert(0, parent)
-    try:
-        from kroxai.torch_chat import KroxAI  # type: ignore
-    except Exception:
-        try:
-            from torch_chat import KroxAI  # type: ignore
-        except Exception:
-            raise
+from kroxai_mini.torch_chat import KroxAI
 
 try:
-    from .ce_reranker import get_ce_reranker
+    from kroxai_mini.ce_reranker import get_ce_reranker
 except Exception:
-    try:
-        from kroxai.ce_reranker import get_ce_reranker  # type: ignore
-    except Exception:
-        # Optional fallback if reranker module is unavailable
-        def get_ce_reranker(model_name: str):
-            class _Dummy:
-                ok = False
-                def rerank(self, q, pairs, k=3):
-                    return [(p, 0.0) for p in pairs]
-                def info(self):
-                    return {"ok": False}
-            return _Dummy()
+    # Optional fallback if reranker module is unavailable
+    def get_ce_reranker(model_name: str):
+        class _Dummy:
+            ok = False
+            def rerank(self, q, pairs, k=3):
+                return [(p, 0.0) for p in pairs]
+            def info(self):
+                return {"ok": False}
+        return _Dummy()
 
 # Optional BM25 (MIT: rank_bm25). If missing, use simple keyword scoring.
 try:
@@ -76,8 +51,8 @@ def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 # Mount static and templates (use workspace-level defaults if present)
-TEMPLATES_DIR = os.environ.get("KROXAI_TEMPLATES_DIR", os.path.join(_ws_root, "templates"))
-STATIC_DIR = os.environ.get("KROXAI_STATIC_DIR", os.path.join(_ws_root, "static"))
+TEMPLATES_DIR = os.environ.get("KROXAI_TEMPLATES_DIR", "templates")
+STATIC_DIR = os.environ.get("KROXAI_STATIC_DIR", "static")
 try:
     if os.path.isdir(STATIC_DIR):
         app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

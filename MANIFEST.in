@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+include requirements.txt
+include pyproject.toml
+recursive-include examples *.py
+recursive-include src/kroxai_mini *.py
+global-exclude __pycache__
+global-exclude *.py[co]

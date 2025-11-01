@@ -1,5 +1,9 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "KroxAI-Mini"
+name = "kroxai-mini"
 version = "0.0.1"
 authors = [
   { name="KroxenStudios", email="KroxenStudios@proton.me" },
@@ -9,11 +13,45 @@ readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
-license = "Apache-2.0"
-license-files = ["LICENSE*"]
+license = {text = "Apache-2.0"}
+dependencies = [
+    "numpy>=1.20.0",
+]
+
+[project.optional-dependencies]
+server = [
+    "fastapi>=0.110",
+    "uvicorn>=0.23",
+    "rank_bm25>=0.2.2",
+    "requests>=2.31",
+]
+torch = [
+    "torch>=2.0.0",
+]
+transformers = [
+    "transformers>=4.41",
+]
+all = [
+    "fastapi>=0.110",
+    "uvicorn>=0.23",
+    "rank_bm25>=0.2.2",
+    "requests>=2.31",
+    "torch>=2.0.0",
+    "transformers>=4.41",
+]
 
 [project.urls]
 Homepage = "https://github.com/KroxenStudios/KroxAI-Mini"
 Issues = "https://github.com/KroxenStudios/KroxAI-Mini/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

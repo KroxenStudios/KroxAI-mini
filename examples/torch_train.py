@@ -13,11 +13,11 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader, random_split
 from torch.utils.data.sampler import WeightedRandomSampler
 
-from .tokenizer import SimpleTokenizer
-from .hf_tokenizer import HFTokenizer
-from .data import load_qa_json, build_sequences
-from .torch_model import TorchTransformerLM
-from .configs import get_preset
+from kroxai_mini.tokenizer import SimpleTokenizer
+from kroxai_mini.hf_tokenizer import HFTokenizer
+from kroxai_mini.data import load_qa_json, build_sequences
+from kroxai_mini.torch_model import TorchTransformerLM
+from kroxai_mini.configs import get_preset
 
 
 class SeqDataset(Dataset):
