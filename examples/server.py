@@ -112,21 +112,37 @@ def _rebuild_rag_index():
         RAG_INDEX = None  # keyword fallback
 
 def _validate_rag_path(path: Optional[str]) -> str:
-    """Validate and sanitize RAG path to prevent path traversal attacks."""
+    """Validate and sanitize RAG path to prevent path traversal attacks.
+    
+    Only allows paths within the current working directory and enforces .jsonl extension.
+    This prevents directory traversal and ensures only safe file types are accessed.
+    """
     if path is None:
         return RAG_PATH
     
-    # Resolve to absolute path and check it's not trying to escape
+    # Security: Validate path to prevent directory traversal attacks
     try:
-        resolved = os.path.abspath(path)
-        # Ensure path only contains .jsonl files and is within reasonable bounds
-        if not resolved.endswith('.jsonl'):
+        # Get the base directory (current working directory)
+        base_dir = os.path.abspath(os.getcwd())
+        
+        # Resolve the requested path
+        requested_path = os.path.abspath(os.path.join(base_dir, path))
+        
+        # Security check 1: Ensure path stays within base directory
+        if not requested_path.startswith(base_dir + os.sep) and requested_path != base_dir:
+            raise ValueError("Path must be within current directory")
+        
+        # Security check 2: Ensure .jsonl extension
+        if not requested_path.endswith('.jsonl'):
             raise ValueError("Path must be a .jsonl file")
-        # Prevent directory traversal
-        if '..' in path or path.startswith('/'):
-            raise ValueError("Invalid path")
-        return resolved
+        
+        # Security check 3: Block path traversal patterns
+        if '..' in path:
+            raise ValueError("Path traversal not allowed")
+            
+        return requested_path
     except Exception:
+        # On any error, fall back to default safe path
         return RAG_PATH
 
 def _save_rag(path: Optional[str] = None) -> str:
