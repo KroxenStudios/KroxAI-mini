@@ -111,8 +111,26 @@ def _rebuild_rag_index():
     else:
         RAG_INDEX = None  # keyword fallback
 
+def _validate_rag_path(path: Optional[str]) -> str:
+    """Validate and sanitize RAG path to prevent path traversal attacks."""
+    if path is None:
+        return RAG_PATH
+    
+    # Resolve to absolute path and check it's not trying to escape
+    try:
+        resolved = os.path.abspath(path)
+        # Ensure path only contains .jsonl files and is within reasonable bounds
+        if not resolved.endswith('.jsonl'):
+            raise ValueError("Path must be a .jsonl file")
+        # Prevent directory traversal
+        if '..' in path or path.startswith('/'):
+            raise ValueError("Invalid path")
+        return resolved
+    except Exception:
+        return RAG_PATH
+
 def _save_rag(path: Optional[str] = None) -> str:
-    p = path or RAG_PATH
+    p = _validate_rag_path(path)
     try:
         with open(p, "w", encoding="utf-8") as f:
             for d in RAG_DOCS:
@@ -122,7 +140,7 @@ def _save_rag(path: Optional[str] = None) -> str:
     return p
 
 def _load_rag(path: Optional[str] = None, *, replace: bool = True) -> int:
-    p = path or RAG_PATH
+    p = _validate_rag_path(path)
     count = 0
     docs: List[Dict[str, str]] = []
     try:
