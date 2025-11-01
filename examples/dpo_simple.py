@@ -9,9 +9,9 @@ import torch
 import torch.nn.functional as F
 from torch.optim import AdamW
 
-from .tokenizer import SimpleTokenizer
-from .torch_model import TorchTransformerLM
-from .configs import get_preset
+from kroxai_mini.tokenizer import SimpleTokenizer
+from kroxai_mini.torch_model import TorchTransformerLM
+from kroxai_mini.configs import get_preset
 
 
 def load_jsonl(path: Path) -> List[dict]:

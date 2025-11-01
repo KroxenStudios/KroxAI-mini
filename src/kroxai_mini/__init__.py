@@ -1,17 +1,18 @@
-"""kroxai package public surface.
+"""kroxai_mini package public surface.
 
-Keep imports lightweight so importing ``kroxai`` doesn't pull in heavy
+Keep imports lightweight so importing ``kroxai_mini`` doesn't pull in heavy
 optional dependencies (numpy/torch/transformers).
 
 Expose light components (for example ``SimpleTokenizer``) immediately.
-Expose heavy components like ``KroxAI`` and ``TransformerLM`` lazily
+Expose heavy components like ``KroxAI``, ``TransformerLM``, and ``data_utils`` lazily
 when first accessed.
 """
 
 from .tokenizer import SimpleTokenizer
-from . import data as data_utils
 
 __all__ = ["SimpleTokenizer", "data_utils", "KroxAI", "TransformerLM"]
+
+__version__ = "0.0.1"
 
 
 def _load_kroxai_class():
@@ -27,9 +28,23 @@ def _load_kroxai_class():
 
 
 def _load_transformer():
+    """Lazy import of TransformerLM.
+
+    This requires numpy.
+    """
     from .transformer import TransformerLM
 
     return TransformerLM
+
+
+def _load_data_utils():
+    """Lazy import of data utilities.
+
+    This requires numpy.
+    """
+    from . import data as data_utils
+
+    return data_utils
 
 
 def __getattr__(name: str):
@@ -38,8 +53,10 @@ def __getattr__(name: str):
         return _load_kroxai_class()
     if name == "TransformerLM":
         return _load_transformer()
+    if name == "data_utils":
+        return _load_data_utils()
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def __dir__():
-    return sorted(list(globals().keys()) + ["KroxAI", "TransformerLM"])
+    return sorted(list(globals().keys()) + ["KroxAI", "TransformerLM", "data_utils"])

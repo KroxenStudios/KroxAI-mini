@@ -10,9 +10,9 @@ Future improvement: Port model to PyTorch/JAX for proper training while keeping 
 import argparse
 import numpy as np
 
-from .tokenizer import SimpleTokenizer
-from .transformer import TransformerLM
-from .data import load_qa_json, build_sequences, iter_minibatches
+from kroxai_mini.tokenizer import SimpleTokenizer
+from kroxai_mini.transformer import TransformerLM
+from kroxai_mini.data import load_qa_json, build_sequences, iter_minibatches
 
 
 def main():
