@@ -1,0 +1,19 @@
+[project]
+name = "KroxAI-Mini"
+version = "0.0.1"
+authors = [
+  { name="KroxenStudios", email="KroxenStudios@proton.me" },
+]
+description = "KroxAI-Mini is a lightweight version of KroxAI (which will be released in late 2025), designed for easy integration into various applications while maintaining core functionalities."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "Apache-2.0"
+license-files = ["LICENSE*"]
+
+[project.urls]
+Homepage = "https://github.com/KroxenStudios/KroxAI-Mini"
+Issues = "https://github.com/KroxenStudios/KroxAI-Mini/issues"
