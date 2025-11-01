@@ -70,19 +70,42 @@ pip install kroxai-mini[all]
 
 ## Usage
 
-### Basic usage (core library)
+### Basic usage - Tokenizer (no dependencies)
 ```python
-from kroxai_mini.tokenizer import SimpleTokenizer
-from kroxai_mini.transformer import TransformerLM
+from kroxai_mini import SimpleTokenizer
+
+# Initialize tokenizer
+tk = SimpleTokenizer()
+
+# Encode text
+text = "Hello, world!"
+tokens = tk.encode(text, add_bos=True, add_eos=True)
+print(f"Tokens: {tokens}")
+
+# Decode tokens
+decoded = tk.decode(tokens)
+print(f"Decoded: {decoded}")
+```
+
+### Advanced usage - Full model (requires numpy)
+```python
+from kroxai_mini import SimpleTokenizer, TransformerLM
+import numpy as np
 
 # Initialize tokenizer and model
 tk = SimpleTokenizer()
-model = TransformerLM(vocab_size=tk.vocab_size, dim=128, n_layers=2, n_heads=4, ff_hidden=256, max_len=128)
+model = TransformerLM(
+    vocab_size=tk.vocab_size, 
+    dim=128, 
+    n_layers=2, 
+    n_heads=4, 
+    ff_hidden=256, 
+    max_len=128
+)
 
 # Generate text
 prompt = "Q: What is AI?\nA: "
 ids = tk.encode(prompt, add_bos=True)
-import numpy as np
 x = np.array([ids], dtype=np.int64)
 y = model.generate(x, max_new_tokens=64)
 response = tk.decode(y[0, len(ids):].tolist())
