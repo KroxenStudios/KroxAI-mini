@@ -32,5 +32,98 @@ _In short:_
 KroxAI mini is the first open-source prototype of this approach — a compact EAM that demonstrates how evidence‑grounded reasoning can be combined with modular tool use.
 
 
+## Installation
 
+### From PyPI (once published)
+```bash
+pip install kroxai-mini
+```
+
+### From source
+```bash
+git clone https://github.com/KroxenStudios/KroxAI-Mini.git
+cd KroxAI-Mini
+pip install -e .
+```
+
+### Optional dependencies
+
+Install with server support (FastAPI, uvicorn, BM25):
+```bash
+pip install kroxai-mini[server]
+```
+
+Install with PyTorch support:
+```bash
+pip install kroxai-mini[torch]
+```
+
+Install with HuggingFace Transformers support:
+```bash
+pip install kroxai-mini[transformers]
+```
+
+Install all optional dependencies:
+```bash
+pip install kroxai-mini[all]
+```
+
+## Usage
+
+### Basic usage - Tokenizer (no dependencies)
+```python
+from kroxai_mini import SimpleTokenizer
+
+# Initialize tokenizer
+tk = SimpleTokenizer()
+
+# Encode text
+text = "Hello, world!"
+tokens = tk.encode(text, add_bos=True, add_eos=True)
+print(f"Tokens: {tokens}")
+
+# Decode tokens
+decoded = tk.decode(tokens)
+print(f"Decoded: {decoded}")
+```
+
+### Advanced usage - Full model (requires numpy)
+```python
+from kroxai_mini import SimpleTokenizer, TransformerLM
+import numpy as np
+
+# Initialize tokenizer and model
+tk = SimpleTokenizer()
+model = TransformerLM(
+    vocab_size=tk.vocab_size, 
+    dim=128, 
+    n_layers=2, 
+    n_heads=4, 
+    ff_hidden=256, 
+    max_len=128
+)
+
+# Generate text
+prompt = "Q: What is AI?\nA: "
+ids = tk.encode(prompt, add_bos=True)
+x = np.array([ids], dtype=np.int64)
+y = model.generate(x, max_new_tokens=64)
+response = tk.decode(y[0, len(ids):].tolist())
+print(response)
+```
+
+### Running the server
+```bash
+python examples/server.py
+```
+
+### Training a model
+```bash
+python examples/torch_train.py data.json
+```
+
+### Interactive chat
+```bash
+python examples/chat.py
+```
 

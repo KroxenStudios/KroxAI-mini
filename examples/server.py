@@ -20,45 +20,20 @@ from collections import deque
 import sys
 from pathlib import Path
 
-# Ensure parent directory is on sys.path when running as a script
-_this_file = Path(__file__).resolve()
-_pkg_root = _this_file.parent
-_ws_root = _pkg_root.parent
-if str(_ws_root) not in sys.path:
-    sys.path.insert(0, str(_ws_root))
-
-# Robust imports: prefer relative (package mode), fallback to absolute or local (script mode)
-try:
-    from .torch_chat import KroxAI
-except Exception:
-    # If running as a script (python kroxai/server.py), ensure parent dir is on sys.path
-    this_dir = os.path.dirname(os.path.abspath(__file__))
-    parent = os.path.dirname(this_dir)
-    if parent not in sys.path:
-        sys.path.insert(0, parent)
-    try:
-        from kroxai.torch_chat import KroxAI  # type: ignore
-    except Exception:
-        try:
-            from torch_chat import KroxAI  # type: ignore
-        except Exception:
-            raise
+from kroxai_mini.torch_chat import KroxAI
 
 try:
-    from .ce_reranker import get_ce_reranker
+    from kroxai_mini.ce_reranker import get_ce_reranker
 except Exception:
-    try:
-        from kroxai.ce_reranker import get_ce_reranker  # type: ignore
-    except Exception:
-        # Optional fallback if reranker module is unavailable
-        def get_ce_reranker(model_name: str):
-            class _Dummy:
-                ok = False
-                def rerank(self, q, pairs, k=3):
-                    return [(p, 0.0) for p in pairs]
-                def info(self):
-                    return {"ok": False}
-            return _Dummy()
+    # Optional fallback if reranker module is unavailable
+    def get_ce_reranker(model_name: str):
+        class _Dummy:
+            ok = False
+            def rerank(self, q, pairs, k=3):
+                return [(p, 0.0) for p in pairs]
+            def info(self):
+                return {"ok": False}
+        return _Dummy()
 
 # Optional BM25 (MIT: rank_bm25). If missing, use simple keyword scoring.
 try:
@@ -76,8 +51,8 @@ def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 # Mount static and templates (use workspace-level defaults if present)
-TEMPLATES_DIR = os.environ.get("KROXAI_TEMPLATES_DIR", os.path.join(_ws_root, "templates"))
-STATIC_DIR = os.environ.get("KROXAI_STATIC_DIR", os.path.join(_ws_root, "static"))
+TEMPLATES_DIR = os.environ.get("KROXAI_TEMPLATES_DIR", "templates")
+STATIC_DIR = os.environ.get("KROXAI_STATIC_DIR", "static")
 try:
     if os.path.isdir(STATIC_DIR):
         app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -136,8 +111,42 @@ def _rebuild_rag_index():
     else:
         RAG_INDEX = None  # keyword fallback
 
+def _validate_rag_path(path: Optional[str]) -> str:
+    """Validate and sanitize RAG path to prevent path traversal attacks.
+    
+    Only allows paths within the current working directory and enforces .jsonl extension.
+    This prevents directory traversal and ensures only safe file types are accessed.
+    """
+    if path is None:
+        return RAG_PATH
+    
+    # Security: Validate path to prevent directory traversal attacks
+    try:
+        # Get the base directory (current working directory)
+        base_dir = os.path.abspath(os.getcwd())
+        
+        # Resolve the requested path
+        requested_path = os.path.abspath(os.path.join(base_dir, path))
+        
+        # Security check 1: Ensure path stays within base directory
+        if not requested_path.startswith(base_dir + os.sep) and requested_path != base_dir:
+            raise ValueError("Path must be within current directory")
+        
+        # Security check 2: Ensure .jsonl extension
+        if not requested_path.endswith('.jsonl'):
+            raise ValueError("Path must be a .jsonl file")
+        
+        # Security check 3: Block path traversal patterns
+        if '..' in path:
+            raise ValueError("Path traversal not allowed")
+            
+        return requested_path
+    except Exception:
+        # On any error, fall back to default safe path
+        return RAG_PATH
+
 def _save_rag(path: Optional[str] = None) -> str:
-    p = path or RAG_PATH
+    p = _validate_rag_path(path)
     try:
         with open(p, "w", encoding="utf-8") as f:
             for d in RAG_DOCS:
@@ -147,7 +156,7 @@ def _save_rag(path: Optional[str] = None) -> str:
     return p
 
 def _load_rag(path: Optional[str] = None, *, replace: bool = True) -> int:
-    p = path or RAG_PATH
+    p = _validate_rag_path(path)
     count = 0
     docs: List[Dict[str, str]] = []
     try:

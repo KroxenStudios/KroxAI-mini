@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import numpy as np
 
-from .tokenizer import SimpleTokenizer
-from .transformer import TransformerLM
-from .configs import get_preset
+from kroxai_mini.tokenizer import SimpleTokenizer
+from kroxai_mini.transformer import TransformerLM
+from kroxai_mini.configs import get_preset
 import argparse
 
 
